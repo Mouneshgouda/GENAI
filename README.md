@@ -1,3 +1,18 @@
+!pip install gtts #google text to speech
+ !pip install SpeechRecognition #google speech to text
+ !pip install pydub pillow #handling images
+ !pip install pytesseract #for google lens like ocr
+ !pip install googletrans==4.0.0-rc1 #google translation
+ !pip install deepface #demographics extraction of face
+ !pip install textblob #for sentiment analysis
+ !pip install spacy #for name entity recognition
+ !python -m spacy download en_core_web_sm #en_core_web_lg
+ #language model
+ !pip install nrclex #for emotion classification in text
+ #National Research Council Canada Lexion
+
+
+
 #GAn
 
 ```python
