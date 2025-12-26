@@ -1,8 +1,5 @@
 ```python
-from flask import Flask
 import pandas as pd
-import faiss
-from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
@@ -10,65 +7,49 @@ import os
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+# Configure Gemini
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-# ----------------------------
-# Gemini Setup
-# ----------------------------
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-llm = genai.GenerativeModel("gemini-2.5-flash")
-
-# ----------------------------
 # Load CSV
-# ----------------------------
 df = pd.read_csv("qa_data (1).csv")
-docs = [f"Q: {q}\nA: {a}" for q, a in zip(df.question, df.answer)]
 
-# ----------------------------
-# Embeddings + FAISS
-# ----------------------------
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
-emb = embedder.encode(docs)
+# Convert CSV to text context
+context_text = ""
+for _, row in df.iterrows():
+    context_text += f"Q: {row['question']}\nA: {row['answer']}\n\n"
 
-index = faiss.IndexFlatL2(emb.shape[1])
-index.add(emb)
-
-# ----------------------------
-# RAG Function
-# ----------------------------
-def rag(query):
-    _, idx = index.search(embedder.encode([query]), 1)
-    context = docs[idx[0][0]]
-
+def ask_gemini(query):
     prompt = f"""
-Answer ONLY from the context below.
-If not found, say: No relevant Q&A found.
+You are a Q&A assistant.
+
+Answer ONLY using the context below.
+If the answer is not present, say: No relevant Q&A found.
 
 Context:
-{context}
+{context_text}
 
 Question: {query}
 """
-    return llm.generate_content(prompt).text.strip()
+    response = model.generate_content(prompt)
+    return response.text.strip()
 
 # ----------------------------
-# Simple User Input Loop
+# Terminal Chat Loop
 # ----------------------------
-if __name__ == "__main__":
-    print("🔍 RAG Q&A System (type 'exit' to quit)\n")
+print("🤖 Chatbot is running!")
+print("Type 'exit' to quit.\n")
 
-    while True:
-        query = input("Ask your question: ")
+while True:
+    user_input = input("You: ")
 
-        if query.lower() == "exit":
-            print("👋 Exiting...")
-            break
+    if user_input.lower() == "exit":
+        print("👋 Goodbye!")
+        break
 
-        answer = rag(query)
+    answer = ask_gemini(user_input)
+    print(f"Bot: {answer}\n")
 
-        print("\nAnswer:")
-        print(answer)
-        print("-" * 40)
 
 
 
