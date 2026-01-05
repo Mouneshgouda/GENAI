@@ -1,3 +1,26 @@
+Link
+
+ https://forms.gle/BEZvyMRe2kysGH2M6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```python
 from agno.agent import Agent
 from agno.models.ollama import Ollama
